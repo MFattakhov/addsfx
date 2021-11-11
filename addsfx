@@ -1,0 +1,85 @@
+#!/bin/bash
+
+v=
+d=
+
+sep=
+for arg in "$@"
+do
+	if [[ -z "$sep" && "${arg:0:1}" == "-" ]]
+	then
+		case "$arg" in
+		--) sep=1
+		    ;;
+		-v) v=1
+		    ;;
+		-h) echo -e "usage: ./addsfx [-h|-v|-d] sfx [--] files..\noptions: \n\t-h: help\n\t-v: verbose run\n\t-d: dry run"; exit 0
+		    ;;
+		-d) d=1
+		    ;;
+		 *) echo "$0: Invalid option '$arg', try $0 -h" >&2; exit 2
+		esac
+	fi
+done
+
+flag=
+sfx=
+error=
+for arg in "$@"
+do
+	if [[ -z "$flag" ]]
+	then
+		case "$arg" in
+		--) flag=1
+		    ;;
+		-*) :
+		    ;;
+		 *) if [[ -z "$sfx" ]]
+		    then
+		            sfx="$arg"
+		    else
+			    if [[ ! -w "$arg" || "$arg" == addsfx ]]
+			    then
+			            echo "$0: Couldn't rename '$arg'" >&2; error=1
+			    else
+			            filename="${arg##*/}"
+			            path="${arg%$filename}"
+			            ext="${filename#${filename%.*}}"
+			            new_filename="$path${filename%$ext}$sfx$ext"
+			            if [[ -n "$d" || -n "$v" ]]
+			            then
+				            echo "$0: Renamed $arg -> $new_filename"
+			            fi
+			            if [[ -z "$d" ]]
+			            then
+			          	    mv -- "$arg" "$new_filename"
+			            fi
+		            fi
+		    fi
+		esac
+	else
+		if [[ ! -w "$arg" || "$arg" == addsfx ]]
+		then
+			echo "$0: Couldn't rename '$arg'" >&2; error=1
+		else
+			filename="${arg##*/}"
+			path="${arg%$filename}"
+			ext="${filename#${filename%.*}}"
+			new_filename="$path${filename%$ext}$sfx$ext"
+			if [[ -n "$d" || -n "$v" ]]
+			then
+				echo "renamed $arg -> $new_filename"
+			fi
+			if [[ -z "$d" ]]
+			then
+				mv -- "$arg" "$new_filename"
+			fi
+		fi
+	fi
+done
+
+if [[ -n "$error" ]]; then
+	exit 1
+else
+	exit 0
+fi
