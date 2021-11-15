@@ -38,7 +38,7 @@ do
 		    then
 		            sfx="$arg"
 		    else
-			    if [[ ! -w "$arg" || "$arg" == addsfx ]]
+			    if [[ ! -w "$arg" || "$arg" == "$0" ]]
 			    then
 			            echo "$0: Couldn't rename '$arg'" >&2; error=1
 			    else
@@ -58,7 +58,7 @@ do
 		    fi
 		esac
 	else
-		if [[ ! -w "$arg" || "$arg" == addsfx ]]
+		if [[ ! -w "$arg" || "$arg" == "$0" ]]
 		then
 			echo "$0: Couldn't rename '$arg'" >&2; error=1
 		else
